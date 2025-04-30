@@ -7,15 +7,16 @@ app = FastAPI(
     title="VisaSwift API 🛂",
     description="FastAPI backend for the VisaSwift application. Submit, track, and verify visa applications.",
     version="1.0.0",
-    docs_url="/docs",  # Ensure Swagger is enabled
-    redoc_url="/redoc"  # Optional: enable ReDoc UI
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# In-memory simulated DB
+# In-memory simulated database
 users = {}
 applications = {}
 
-# Models
+# -------------------- Models --------------------
+
 class UserRegister(BaseModel):
     username: str
     password: str
@@ -30,12 +31,13 @@ class VisaApplication(BaseModel):
     travel_date: str
     destination: str
 
-# Root route
+# -------------------- Root Route --------------------
+
 @app.get("/", tags=["Root"])
 def read_root():
     return {"message": "VisaSwift API is up and running!"}
 
-# --- User Routes ---
+# -------------------- User Routes --------------------
 
 @app.post("/user/register", tags=["User"], summary="Register a new user")
 def register(user: UserRegister):
@@ -74,7 +76,7 @@ def check_status(visa_id: str):
         return {"error": "Visa ID not found"}
     return {"status": applications[visa_id]["status"]}
 
-# --- Admin Routes ---
+# -------------------- Admin Routes --------------------
 
 @app.get("/admin/applications", tags=["Admin"], summary="View all visa applications")
 def list_applications():
