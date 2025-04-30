@@ -1,14 +1,19 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 import uuid
 
-app = FastAPI()
+app = FastAPI(
+    title="VisaSwift API 🛂",
+    description="FastAPI backend for the VisaSwift application. Submit, track, and verify visa applications.",
+    version="1.0.0"
+)
 
-# Simulated in-memory DB
+# In-memory simulated DB
 users = {}
 applications = {}
 
+# Models
 class UserRegister(BaseModel):
     username: str
     password: str
@@ -23,26 +28,27 @@ class VisaApplication(BaseModel):
     travel_date: str
     destination: str
 
-@app.get("/")
+# Root route
+@app.get("/", tags=["Root"])
 def read_root():
-    return {"message": "VisaSwift API Running!"}
+    return {"message": "VisaSwift API is up and running!"}
 
 # --- User Routes ---
 
-@app.post("/user/register")
+@app.post("/user/register", tags=["User"], summary="Register a new user")
 def register(user: UserRegister):
     if user.username in users:
         return {"error": "User already exists"}
     users[user.username] = user.password
     return {"message": "User registered"}
 
-@app.post("/user/login")
+@app.post("/user/login", tags=["User"], summary="Login for existing user")
 def login(user: UserLogin):
     if users.get(user.username) != user.password:
         return {"error": "Invalid credentials"}
     return {"message": "Login successful"}
 
-@app.post("/user/apply")
+@app.post("/user/apply", tags=["User"], summary="Apply for a visa")
 def apply_visa(application: VisaApplication):
     visa_id = str(uuid.uuid4())
     applications[visa_id] = {
@@ -53,14 +59,14 @@ def apply_visa(application: VisaApplication):
     }
     return {"visa_id": visa_id, "message": "Application submitted"}
 
-@app.post("/user/upload/{visa_id}")
+@app.post("/user/upload/{visa_id}", tags=["User"], summary="Upload document for a visa application")
 def upload_doc(visa_id: str, file: UploadFile = File(...)):
     if visa_id not in applications:
         return {"error": "Invalid visa ID"}
     applications[visa_id]["doc_uploaded"] = True
     return {"message": f"Document uploaded for {visa_id}"}
 
-@app.get("/user/status/{visa_id}")
+@app.get("/user/status/{visa_id}", tags=["User"], summary="Check visa application status")
 def check_status(visa_id: str):
     if visa_id not in applications:
         return {"error": "Visa ID not found"}
@@ -68,11 +74,11 @@ def check_status(visa_id: str):
 
 # --- Admin Routes ---
 
-@app.get("/admin/applications")
+@app.get("/admin/applications", tags=["Admin"], summary="View all visa applications")
 def list_applications():
     return applications
 
-@app.post("/admin/verify/{visa_id}")
+@app.post("/admin/verify/{visa_id}", tags=["Admin"], summary="Verify uploaded document for a visa")
 def verify_doc(visa_id: str):
     if visa_id not in applications:
         return {"error": "Invalid visa ID"}
@@ -81,7 +87,7 @@ def verify_doc(visa_id: str):
     applications[visa_id]["verified"] = True
     return {"message": "Documents verified"}
 
-@app.post("/admin/approve/{visa_id}")
+@app.post("/admin/approve/{visa_id}", tags=["Admin"], summary="Approve a verified visa application")
 def approve_app(visa_id: str):
     if visa_id not in applications:
         return {"error": "Invalid visa ID"}
