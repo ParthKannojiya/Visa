@@ -6,7 +6,9 @@ import uuid
 app = FastAPI(
     title="VisaSwift API 🛂",
     description="FastAPI backend for the VisaSwift application. Submit, track, and verify visa applications.",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs",  # Ensure Swagger is enabled
+    redoc_url="/redoc"  # Optional: enable ReDoc UI
 )
 
 # In-memory simulated DB
